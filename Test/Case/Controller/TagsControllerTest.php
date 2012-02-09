@@ -78,24 +78,25 @@ class TagsControllerTest extends CakeTestCase {
 	public $Tags = null;
 
 /**
- * startTest
+ * setUp
  *
  * @return void
  */
-	public function startTest() {
-		$this->Tags = new TestTagsController();
+	public function setUp() {
+		$this->Tags = new TestTagsController(new CakeRequest(null, false));
 		$this->Tags->params = array(
 			'named' => array(),
 			'url' => array());
 		$this->Tags->constructClasses();
+		$this->Tags->Session = $this->getMock('SessionComponent', array(), array(), '', false);
 	}
 
 /**
- * endTest
+ * tearDown
  *
  * @return void
  */
-	public function endTest() {
+	public function tearDown() {
 		unset($this->Tags);
 	}
 
@@ -162,13 +163,22 @@ class TagsControllerTest extends CakeTestCase {
  * @return void
  */
 	public function testAdminDelete() {
-		$this->Tags->admin_delete('WRONG-ID');
-		$this->assertEqual($this->Tags->redirectUrl, array('action' => 'index'));
-		$this->assertEqual($_SESSION['Message']['flash']['message'], 'Invalid Tag.');
+		$this->Tags->Session->expects($this->at(0))
+			->method('setFlash')
+			->with($this->equalTo('Invalid Tag.'))
+			->will($this->returnValue(true));
 
-		$this->Tags->admin_delete(1);
+		$this->Tags->Session->expects($this->at(1))
+			->method('setFlash')
+			->with($this->equalTo('Tag deleted.'))
+			->will($this->returnValue(true));
+		
+
+		$this->Tags->admin_delete('WRONG-ID!!!');
 		$this->assertEqual($this->Tags->redirectUrl, array('action' => 'index'));
-		$this->assertEqual($_SESSION['Message']['flash']['message'], 'Tag deleted.');
+
+		$this->Tags->admin_delete('tag-1');
+		$this->assertEqual($this->Tags->redirectUrl, array('action' => 'index'));
 	}
 
 /**
@@ -190,14 +200,15 @@ class TagsControllerTest extends CakeTestCase {
  * @return void
  */
 	public function testAdminEdit() {
-		$this->Tags->admin_edit(1);
+		$this->Tags->admin_edit('tag-1');
 		$tag = array(
 			'Tag' => array(
-				'id'  => 1,
+				'id'  => 'tag-1',
 				'identifier'  => null,
 				'name'  => 'CakePHP',
 				'keyname'  => 'cakephp',
-				'weight' => 2,
+				'occurrence' => 1,
+				'article_occurrence' => 1,
 				'created'  => '2008-06-02 18:18:11',
 				'modified'  => '2008-06-02 18:18:37'));
 		$this->assertEqual($this->Tags->data, $tag);

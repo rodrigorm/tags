@@ -25,6 +25,13 @@ class TagsController extends TagsAppController {
 	public $name = 'Tags';
 
 /**
+ * Components
+ *
+ * @var array
+ */
+	public $components = array('Session');
+
+/**
  * Helpers
  *
  * @var array
@@ -87,9 +94,9 @@ class TagsController extends TagsAppController {
  * @return void
  */
 	public function admin_add() {
-		if (!empty($this->data)) {
-			if ($this->Tag->add($this->data)) {
-				$this->Session->setFlash(__d('tags', 'The Tags has been saved.', true));
+		if (!empty($this->request->data)) {
+			if ($this->Tag->add($this->request->data)) {
+				$this->Session->setFlash(__d('tags', 'The Tags has been saved.'));
 				$this->redirect(array('action' => 'index'));
 			}
 		}
@@ -103,20 +110,20 @@ class TagsController extends TagsAppController {
  */
 	public function admin_edit($tagId = null) {
 		try {
-			$result = $this->Tag->edit($tagId, $this->data);
+			$result = $this->Tag->edit($tagId, $this->request->data);
 			if ($result === true) {
-				$this->Session->setFlash(__d('tags', 'Tag saved.', true));
+				$this->Session->setFlash(__d('tags', 'Tag saved.'));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->data = $result;
+				$this->request->data = $result;
 			}
 		} catch (Exception $e) {
 			$this->Session->setFlash($e->getMessage());
 			$this->redirect(array('action' => 'index'));
 		}
 
-		if (empty($this->data)) {
-			$this->data = $this->Tag->data;
+		if (empty($this->request->data)) {
+			$this->request->data = $this->Tag->data;
 		}
 	}
 
@@ -128,9 +135,9 @@ class TagsController extends TagsAppController {
  */
 	public function admin_delete($id = null) {
 		if ($this->Tag->delete($id)) {
-			$this->Session->setFlash(__d('tags', 'Tag deleted.', true));
+			$this->Session->setFlash(__d('tags', 'Tag deleted.'));
 		} else {
-			$this->Session->setFlash(__d('tags', 'Invalid Tag.', true));
+			$this->Session->setFlash(__d('tags', 'Invalid Tag.'));
 		}
 		$this->redirect(array('action' => 'index'));
 	}

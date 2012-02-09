@@ -24,7 +24,7 @@ class TestTag extends Tag {
  *
  * @var string
  */
-	public $useDbConfig = "test_suite";
+	public $useDbConfig = "test";
 
 /**
  * Cache Sources
@@ -78,7 +78,7 @@ class TagTestCase extends CakeTestCase {
 	public $Tag = null;
 
 /**
- * startTest
+ * setUp
  *
  * @var array
  */
@@ -87,20 +87,20 @@ class TagTestCase extends CakeTestCase {
 		'plugin.tags.tag');
 
 /**
- * startTest
+ * setUp
  *
  * @return void
  */
-	public function startTest() {
+	public function setUp() {
 		$this->Tag = new TestTag();
 	}
 
 /**
- * endTest
+ * tearDown
  *
  * @return void
  */
-	public function endTest() {
+	public function tearDown() {
 		unset($this->Tag);
 	}
 
@@ -125,11 +125,12 @@ class TagTestCase extends CakeTestCase {
 
 		$expected = array(
 			'Tag' => array(
-				'id'  => 1,
+				'id'  => 'tag-1',
 				'identifier'  => null,
 				'name'  => 'CakePHP',
 				'keyname'  => 'cakephp',
-				'weight' => 2,
+				'occurrence' => 1,
+				'article_occurrence' => 1,
 				'created'  => '2008-06-02 18:18:11',
 				'modified'  => '2008-06-02 18:18:37'));
 		$this->assertEqual($results, $expected);
@@ -145,7 +146,7 @@ class TagTestCase extends CakeTestCase {
 		$this->assertTrue(is_array($result));
 		$this->assertEqual($result['Tag']['keyname'], 'cakephp');
 
-		$this->expectException('Exception');
+		$this->expectException('InvalidArgumentException');
 		$this->Tag->view('invalid-key!!!');
 	}
 
@@ -175,29 +176,29 @@ class TagTestCase extends CakeTestCase {
  * @return void
  */
 	public function testEdit() {
-		$this->assertNull($this->Tag->edit(1));
-		$this->assertEqual($this->Tag->data['Tag']['id'], 1);
+		$this->assertNull($this->Tag->edit('tag-1'));
+		$this->assertEqual($this->Tag->data['Tag']['id'], 'tag-1');
 		
 		$data = array(
 			'Tag' => array(
-				'id' => 1,
+				'id' => 'tag-1',
 				'name' => 'CAKEPHP'));
-		$this->assertTrue($this->Tag->edit(1, $data));
+		$this->assertTrue($this->Tag->edit('tag-1', $data));
 
 		$data = array(
 			'Tag' => array(
-				'id' => 1,
+				'id' => 'tag-1',
 				'name' => 'CAKEPHP111'));
-		$this->assertFalse($this->Tag->edit(1, $data));
+		$this->assertFalse($this->Tag->edit('tag-1', $data));
 
 		$data = array(
 			'Tag' => array(
-				'id' => 1,
+				'id' => 'tag-1',
 				'name' => 'CAKEPHP',
 				'keyname' => ''));
-		$this->assertEqual($this->Tag->edit(1, $data), $data);
+		$this->assertEqual($this->Tag->edit('tag-1', $data), $data);
 		
-		$this->expectException('Exception');
+		$this->expectException('InvalidArgumentException');
 		$this->assertTrue($this->Tag->edit('invalid-id', array()));
 	}
 }

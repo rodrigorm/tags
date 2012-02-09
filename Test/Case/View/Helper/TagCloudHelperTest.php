@@ -10,6 +10,7 @@
  */
 
 App::import('Helper', array('Html', 'Tags.TagCloud'));
+App::import('View', array('View'));
 
 /**
  * TagCloudHelperTestCase
@@ -28,11 +29,13 @@ class TagCloudHelperTestCase extends CakeTestCase {
 
 /**
  * (non-PHPdoc)
- * @see cake/tests/lib/CakeTestCase#startTest($method)
+ * @see cake/tests/lib/CakeTestCase#setUp($method)
  */
-	public function startTest() {
-		$this->TagCloud = new TagCloudHelper();
-		$this->TagCloud->Html = new HtmlHelper();
+	public function setUp() {
+		$controller = null;
+		$this->View = new View($controller);
+		$this->TagCloud = new TagCloudHelper($this->View);
+		$this->TagCloud->Html = new HtmlHelper($this->View);
 	}
 
 /**
@@ -71,7 +74,7 @@ class TagCloudHelperTestCase extends CakeTestCase {
 		do {
 			$i--;
 			$result = $this->TagCloud->display($tags, $options);
-		} while($result == $expected && $i > 0);
+		} while ($result == $expected && $i > 0);
 		$this->assertNotEqual($result, $expected);
 
 		// Test normal display
@@ -103,10 +106,10 @@ class TagCloudHelperTestCase extends CakeTestCase {
 
 /**
  * (non-PHPdoc)
- * @see cake/tests/lib/CakeTestCase#endTest($method)
+ * @see cake/tests/lib/CakeTestCase#tearDown($method)
  */
-	public function endTest() {
-		unset($this->TagCloud);
+	public function tearDown() {
+		unset($this->TagCloud, $this->View);
 		ClassRegistry::flush();
 	}
 }

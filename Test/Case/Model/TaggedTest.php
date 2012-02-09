@@ -37,20 +37,20 @@ class TaggedTestCase extends CakeTestCase {
 		'plugin.tags.article');
 
 /**
- * startTest
+ * setUp
  *
  * @return void
  */
-	public function startTest() {
+	public function setUp() {
 		$this->Tagged = ClassRegistry::init('Tags.Tagged');
 	}
 
 /**
- * endTest
+ * tearDown
  *
  * @return void
  */
-	public function endTest() {
+	public function tearDown() {
 		unset($this->Tagged);
 		ClassRegistry::flush(); 
 	}
@@ -77,8 +77,8 @@ class TaggedTestCase extends CakeTestCase {
 		$expected = array(
 			'Tagged' => array(
 				'id' => '49357f3f-c464-461f-86ac-a85d4a35e6b6',
-				'foreign_key' => 1,
-				'tag_id' => 1, //cakephp
+				'foreign_key' => 'article-1',
+				'tag_id' => 'tag-1', //cakephp
 				'model' => 'Article',
 				'language' => 'eng',
 				'times_tagged' => 1,
@@ -96,31 +96,62 @@ class TaggedTestCase extends CakeTestCase {
 	public function testFindCloud() {
 		$result = $this->Tagged->find('cloud', array(
 			'model' => 'Article'));
+		
 		$this->assertEqual(count($result), 3);
 		$this->assertTrue(isset($result[0][0]['occurrence']));
 		$this->assertEqual($result[0][0]['occurrence'], 1);
+
+		$result = $this->Tagged->find('cloud');
+		$this->assertTrue(is_array($result) && !empty($result));
+
+		$result = $this->Tagged->find('cloud', array(
+			'limit' => 1));
+		$this->assertEqual(count($result), 1);
 	}
-	
+
 /**
  * Test custom _findTagged method
  * 
  * @return void
  */
 	public function testFindTagged() {
+		$this->Tagged->recursive = -1;
 		$result = $this->Tagged->find('tagged', array(
 			'by' => 'cakephp',
 			'model' => 'Article'));
 		$this->assertEqual(count($result), 1);
-		$this->assertEqual($result[0]['Article']['id'], 1);
-		
+		$this->assertEqual($result[0]['Article']['id'], 'article-1');
+
 		$result = $this->Tagged->find('tagged', array(
 			'model' => 'Article'));
 		$this->assertEqual(count($result), 2);
-		
+
 		// Test call to paginateCount by Controller::pagination()
 		$result = $this->Tagged->paginateCount(array(), 1, array(
 			'model' => 'Article',
 			'type' => 'tagged'));
 		$this->assertEqual($result, 2);
 	}
+
+/**
+ * Test custom _findTagged method with additional conditions on the model
+ *
+ * @return void
+ */
+	public function testFindTaggedWithConditions() {
+		$this->Tagged->recursive = -1;
+		$result = $this->Tagged->find('tagged', array(
+			'by' => 'cakephp',
+			'model' => 'Article',
+			'conditions' => array('Article.title LIKE' => 'Second %')));
+		$this->assertEqual(count($result), 0);
+
+		$result = $this->Tagged->find('tagged', array(
+			'by' => 'cakephp',
+			'model' => 'Article',
+			'conditions' => array('Article.title LIKE' => 'First %')));
+		$this->assertEqual(count($result), 1);
+		$this->assertEqual($result[0]['Article']['id'], 'article-1');
+	}
+
 }

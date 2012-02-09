@@ -8,13 +8,21 @@
  * @copyright Copyright 2009-2010, Cake Development Corporation (http://cakedc.com)
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
-
+App::uses('AppModel', 'Model');
 /**
  * Tags Plugin AppModel
  *
  * @package tags
  */
 class TagsAppModel extends AppModel {
+
+/**
+ * Behaviors
+ *
+ * @var array
+ */
+	public $actsAs = array(
+		'Containable');
 
 /**
  * Customized paginateCount method
@@ -29,7 +37,7 @@ class TagsAppModel extends AppModel {
 		if ($recursive != $this->recursive) {
 			$parameters['recursive'] = $recursive;
 		}
-		if (isset($extra['type']) && isset($this->_findMethods[$extra['type']])) {
+		if (isset($extra['type']) && isset($this->findMethods[$extra['type']])) {
 			$extra['operation'] = 'count';
 			return $this->find($extra['type'], array_merge($parameters, $extra));
 		} else {
