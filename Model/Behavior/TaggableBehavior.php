@@ -321,7 +321,7 @@ class TaggableBehavior extends ModelBehavior {
  *
  * @param AppModel $Model
  */
-	public function afterSave(Model $Model) {
+	public function afterSave(Model $Model, $created) {
 		if ($this->settings[$Model->alias]['automaticTagging'] == true && !empty($Model->data[$Model->alias][$this->settings[$Model->alias]['field']])) {
 			$this->saveTags($Model, $Model->data[$Model->alias][$this->settings[$Model->alias]['field']], $Model->id);
 		}
@@ -330,9 +330,9 @@ class TaggableBehavior extends ModelBehavior {
 /**
  * afterFind Callback
  *
- * @param AppModel $Model 
- * @param array $results 
- * @param boolean $primary 
+ * @param AppModel $Model
+ * @param array $results
+ * @param boolean $primary
  * @return array
  */
 	public function afterFind(Model $Model, $results, $primary) {
